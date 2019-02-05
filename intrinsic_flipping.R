@@ -24,10 +24,10 @@ func1 <- function(t,y, params)
       {f <- y[1]; r <- y[2]
       df <- k1*r - k2*f
       dr <- -df
-      dy <- list(df,dr)}
+      dy <- list(c(df,dr))}
 )}
   
-
 # Solving ODE for intrinsic flipping
 out1 <- ode(c(f = f0, r = r0), times = t, func1, c(k1,k2))
-View(out1)
+# View(out1)
+with(out1, plot(time,f))

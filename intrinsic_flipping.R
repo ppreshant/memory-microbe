@@ -18,11 +18,9 @@ t <- seq(0,.05,.0001) # time sequence
 
 # calling libraries
 library(deSolve)
+library(tidyverse)
 library(ggplot2)
 library(magrittr)
-
-# other initializations
-t <- seq(0,10,.01)
 
 # differential equations
 func_i <- function(t,y, params) # differential equation for intrinsic flipping - integrase independant
@@ -44,5 +42,10 @@ func_int <- function(t,y, params) # integrase dependant flipping differential eq
 # Solving ODE for intrinsic flipping
 out_i <- ode(c(f = f0, r = r0), times = t, func_i, c(k1,k2))
 
-# plt <- out1 %>% ggplot()
-plot(out_i[,1], out_i[,2])
+# polishing ODE output data
+out_i1 <- out_i %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('orientation','# of plasmids', -time)
+  
+# plotting # of plasmids with time
+plt <- out_i1 %>% ggplot(aes(time,`# of plasmids`, color = orientation)) + geom_line() + geom_point() + ylab('# of flipped plasmids') +
+       theme_classic() + scale_color_brewer(palette="Set1")  
+print(plt)

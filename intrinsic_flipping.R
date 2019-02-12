@@ -5,16 +5,16 @@
 # initializing variables
 r0 <- 1e10 # copies of plasmid (unflipped) in 1 ml culture
 f0 <- 0
-k1 <- 100 # sec-1
-k2 <- 200 # sec-1
+k1 <- 10 # hr-1
+k2 <- 50 # hr-1
 
-i0 <- 1e3 # number of integrase proteins
-kcat <- 1 # sec-1
+i0 <- 1e6 # number of integrase proteins
+kcat <- 1e4 # hr-1
 km <- 1e5 # copies
 n <- 4 # effective hill coefficient - Integrase tetramerization and binding
 
 # other initializations
-t <- seq(0,.05,.0001) # time sequence
+t <- seq(0,.05,.001) # time sequence
 
 # calling libraries
 library(deSolve)
@@ -43,9 +43,10 @@ func_int <- function(t,y, params) # integrase dependant flipping differential eq
 out_i <- ode(c(f = f0, r = r0), times = t, func_i, c(k1,k2))
 
 # polishing ODE output data
-out_i1 <- out_i %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('orientation','# of plasmids', -time)
+out_i1 <- out_i %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time)
   
 # plotting # of plasmids with time
-plt <- out_i1 %>% ggplot(aes(time,`# of plasmids`, color = orientation)) + geom_line() + geom_point() + ylab('# of flipped plasmids') +
-       theme_classic() + scale_color_brewer(palette="Set1")  
+plt <- out_i1 %>% ggplot() + aes(time,`# of plasmids`, color = Orientation) + geom_line() + geom_point() + 
+       xlab('Time (sec)') + ggtitle('Integrase independant flipping') +
+       theme_classic() + scale_color_brewer(palette="Set1") + theme(plot.title = element_text(hjust = 0.5))  
 print(plt)

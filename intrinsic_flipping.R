@@ -1,6 +1,7 @@
 # Code for memory-microbe
-# Author: Prashant Kalvapalle
+# Author: Prashant Kalvapalle, Stadler lab/Rice University
 # Date started: 1 feb 2019
+# Description: Solving ODEs for integrase based flipping of DNA 
 
 # initializing variables
 r0 <- 1e10 # copies of plasmid (unflipped) in 1 ml culture
@@ -44,7 +45,7 @@ out_i <- ode(c(f = f0, r = r0), times = t, func_i, c(k1,k2))
 out_int <- ode(c(f = f0, r = r0), times = t, func_int, c(k1,k2,kcat,km,n,i0))
 
 # polishing ODE output data
-out_i1 <- out_i %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time)
+out_i1 <- out_i %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time) %>% 
 out_int1 <- out_int %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time)
   
 # plotting # of plasmids with time

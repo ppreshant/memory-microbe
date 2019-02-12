@@ -3,7 +3,7 @@
 # Date started: 1 feb 2019
 # Description: Solving ODEs for integrase based flipping of DNA 
 
-# initializing variables
+# initializing variables----
 r0 <- 1e10 # copies of plasmid (unflipped) in 1 ml culture
 f0 <- 0
 k1 <- 10 # hr-1
@@ -23,7 +23,7 @@ library(tidyverse)
 library(ggplot2)
 library(magrittr)
 
-# differential equations
+# differential equations----
 func_i <- function(t,y, params) # differential equation for intrinsic flipping - integrase independant
 {with(as.list(c(y,params)),
       {f <- y[1]; r <- y[2]
@@ -44,18 +44,14 @@ func_int <- function(t,y, params) # integrase dependant flipping differential eq
 out_i <- ode(c(f = f0, r = r0), times = t, func_i, c(k1,k2))
 out_int <- ode(c(f = f0, r = r0), times = t, func_int, c(k1,k2,kcat,km,n,i0))
 
-# polishing ODE output data
-out_i1 <- out_i %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time) %>% 
-out_int1 <- out_int %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time)
-  
-# plotting # of plasmids with time
-plt <- out_i1 %>% ggplot() + aes(time,`# of plasmids`, color = Orientation) + geom_line() + geom_point() + 
-       xlab('Time (hrs)') + ggtitle('Integrase independant flipping') +
-       theme_classic() + scale_color_brewer(palette="Set1") + theme(plot.title = element_text(hjust = 0.5))  
-# print(plt)
+# polishing ODE output data----
+out_i1 <- out_i %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time) %>% add_column(experiment = 'Intrinsic flip') # rename columns, gather into long array, add column to identify type
+out_int1 <- out_int %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time) %>% add_column(experiment = 'Baseline integrase activity')
+timeseries <- full_join(out_i1, out_int1) # joining results from multiple ODES : integrase independant and dependant
 
-plt_int <- out_int1 %>% ggplot() + aes(time,`# of plasmids`, color = Orientation) + geom_line() + geom_point() + 
-  xlab('Time (hrs)') + ggtitle('Baseline Integrase flipping') +
-  theme_classic() + scale_color_brewer(palette="Set1") + theme(plot.title = element_text(hjust = 0.5))  
-
-print(plt_int)
+# plotting # of plasmids with time----
+# plots are faceted by experiment type : intrinsic flip vs basline integrase flip
+plt <- timeseries %>% ggplot() + aes(time,`# of plasmids`, color = Orientation, facet = experiment) + geom_line() + geom_point() + 
+       xlab('Time (hrs)') + ggtitle('Flipping with and without Integrase') + facet_wrap(~forcats::fct_inorder(experiment), scales = 'free_x') +  # fct_inorder ensures plotting in the order of joining of the experiments 
+       theme_classic() + scale_color_brewer(palette="Set1") + theme(plot.title = element_text(hjust = 0.5))  # Setting theme, colour scale and need to centre the plot title 
+print(plt)

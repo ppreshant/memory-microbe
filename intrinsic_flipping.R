@@ -11,6 +11,7 @@ k2 <- 200 # sec-1
 i0 <- 1e3 # number of integrase proteins
 kcat <- 1 # sec-1
 km <- 1e5 # copies
+n <- 4 # effective hill coefficient - Integrase tetramerization and binding
 
 # other initializations
 t <- seq(0,.05,.0001) # time sequence
@@ -32,7 +33,7 @@ func_i <- function(t,y, params) # differential equation for intrinsic flipping -
 func_int <- function(t,y, params) # integrase dependant flipping differential eqn
 {with(as.list(c(y,params)),
       {f <- y[1]; r <- y[2]
-      df <- k1*r - k2*f
+      df <- k1*r + kcat*i0*r^n/(km + r^n) - k2*f
       dr <- -df
       dy <- list(c(df,dr))}
 )}

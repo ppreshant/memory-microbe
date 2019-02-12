@@ -14,6 +14,8 @@ km <- 1e5 # copies
 
 # calling libraries
 library(deSolve)
+library(ggplot2)
+library(magrittr)
 
 # other initializations
 t <- seq(0,10,.01)
@@ -29,5 +31,5 @@ func1 <- function(t,y, params)
   
 # Solving ODE for intrinsic flipping
 out1 <- ode(c(f = f0, r = r0), times = t, func1, c(k1,k2))
-# View(out1)
-with(out1, plot(time,f))
+
+# plt <- out1 %>% ggplot()

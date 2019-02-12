@@ -9,7 +9,7 @@ k1 <- 10 # hr-1
 k2 <- 50 # hr-1
 
 i0 <- 1e6 # number of integrase proteins
-kcat <- 1e4 # hr-1
+kcat <- 1e5 # hr-1
 km <- 1e5 # copies
 n <- 4 # effective hill coefficient - Integrase tetramerization and binding
 
@@ -41,12 +41,20 @@ func_int <- function(t,y, params) # integrase dependant flipping differential eq
 
 # Solving ODE for intrinsic flipping
 out_i <- ode(c(f = f0, r = r0), times = t, func_i, c(k1,k2))
+out_int <- ode(c(f = f0, r = r0), times = t, func_int, c(k1,k2,kcat,km,n,i0))
 
 # polishing ODE output data
 out_i1 <- out_i %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time)
+out_int1 <- out_int %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time)
   
 # plotting # of plasmids with time
 plt <- out_i1 %>% ggplot() + aes(time,`# of plasmids`, color = Orientation) + geom_line() + geom_point() + 
-       xlab('Time (sec)') + ggtitle('Integrase independant flipping') +
+       xlab('Time (hrs)') + ggtitle('Integrase independant flipping') +
        theme_classic() + scale_color_brewer(palette="Set1") + theme(plot.title = element_text(hjust = 0.5))  
-print(plt)
+# print(plt)
+
+plt_int <- out_int1 %>% ggplot() + aes(time,`# of plasmids`, color = Orientation) + geom_line() + geom_point() + 
+  xlab('Time (hrs)') + ggtitle('Baseline Integrase flipping') +
+  theme_classic() + scale_color_brewer(palette="Set1") + theme(plot.title = element_text(hjust = 0.5))  
+
+print(plt_int)

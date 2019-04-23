@@ -5,7 +5,7 @@
 
 # initializing variables----
 r0 <- 1e10 # copies of plasmid (unflipped) in 1 ml culture
-f0 <- 0
+f0 <- 0 # copies of flipped plasmid
 k1 <- 10 # hr-1
 k2 <- 50 # hr-1
 
@@ -24,7 +24,7 @@ library(ggplot2)
 library(magrittr)
 
 # differential equations----
-func_i <- function(t,y, params) # differential equation for intrinsic flipping - integrase independant
+func_intrinsic_flip <- function(t,y, params) # differential equation for intrinsic flipping - integrase independent
 {with(as.list(c(y,params)),
       {f <- y[1]; r <- y[2]
       df <- k1*r - k2*f
@@ -32,7 +32,15 @@ func_i <- function(t,y, params) # differential equation for intrinsic flipping -
       dy <- list(c(df,dr))}
 )}
 
-func_int <- function(t,y, params) # integrase dependant flipping differential eqn
+func_integrase_flip <- function(t,y, params) # integrase dependant flipping differential eqn
+{with(as.list(c(y,params)),
+      {f <- y[1]; r <- y[2]
+      df <- k1*r + kcat*i0*r^n/(km + r^n) - k2*f
+      dr <- -df
+      dy <- list(c(df,dr))}
+)}
+
+func_integrase_expression <- function(t,y, params) # integrase dependant flipping differential eqn
 {with(as.list(c(y,params)),
       {f <- y[1]; r <- y[2]
       df <- k1*r + kcat*i0*r^n/(km + r^n) - k2*f
@@ -41,13 +49,13 @@ func_int <- function(t,y, params) # integrase dependant flipping differential eq
 )}
 
 # Solving ODE for intrinsic flipping
-out_i <- ode(c(f = f0, r = r0), times = t, func_i, c(k1,k2))
-out_int <- ode(c(f = f0, r = r0), times = t, func_int, c(k1,k2,kcat,km,n,i0))
+out_intrinsic_flip <- ode(c(f = f0, r = r0), times = t, func_intrinsic_flip, c(k1,k2))
+out_integrase_flip <- ode(c(f = f0, r = r0), times = t, func_integrase_flip, c(k1,k2,kcat,km,n,i0))
 
 # polishing ODE output data----
-out_i1 <- out_i %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time) %>% add_column(experiment = 'Intrinsic flip') # rename columns, gather into long array, add column to identify type
-out_int1 <- out_int %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time) %>% add_column(experiment = 'Baseline integrase activity')
-timeseries <- full_join(out_i1, out_int1) # joining results from multiple ODES : integrase independant and dependant
+out_intrinsic_flip1 <- out_intrinsic_flip %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time) %>% add_column(experiment = 'Intrinsic flip') # rename columns, gather into long array, add column to identify type
+out_integrase_flip1 <- out_integrase_flip %>% as_tibble() %>% rename(flipped = f, unflipped = r) %>% gather('Orientation','# of plasmids', -time) %>% add_column(experiment = 'Baseline integrase activity')
+timeseries <- full_join(out_intrinsic_flip1, out_integrase_flip1) # joining results from multiple ODES : integrase independant and dependant
 
 # plotting # of plasmids with time----
 # plots are faceted by experiment type : intrinsic flip vs basline integrase flip

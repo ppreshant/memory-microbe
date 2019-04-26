@@ -42,8 +42,8 @@ func_integrase_flip <- function(t,y, params) # integrase dependant flipping diff
 
 func_integrase_expression <- function(t,y, params) # integrase dependant flipping differential eqn
 {with(as.list(c(y,params)),
-      {f <- y[1]; r <- y[2]
-      df <- k1*r + kcat*i0*r^n/(km + r^n) - k2*f
+      {IPTG <- y[1]; r <- y[2]
+      dIntegrase <- k_leak + k_ind* IPTG -   k1*r + kcat*i0*r^n/(km + r^n) - k2*f
       dr <- -df
       dy <- list(c(df,dr))}
 )}
